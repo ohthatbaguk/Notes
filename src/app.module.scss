@@ -1,0 +1,82 @@
+.app {
+  height: 100%;
+  display: flex;
+}
+
+.leftSection {
+  display: flex;
+  justify-content: center;
+  width: 300px;
+  height: 100%;
+}
+
+.aside {
+  background-color: #BCB4DF;
+  width: 100%;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.ul {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+}
+
+ul li {
+  list-style-type: none;
+  font-size: 20px;
+  padding: 10px;
+  margin: 10px;
+}
+
+.activeLi {
+  border-radius: 10px;
+  background-color: #F8F9A3;
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid black;
+}
+
+.nonActive {
+  border-radius: 10px;
+  border: 1px solid black;
+  padding: 10px;
+  margin: 10px;
+  background-color: lightgray;
+}
+
+.ulContainer {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.textareaContainer {
+  flex: 1;
+}
+
+.textarea {
+  resize: none;
+  min-height: 90% !important;
+}
+
+.title {
+  text-align: center;
+  font-size: 25px;
+}
+.content {
+  font-size: 10px;
+  color: gray;
+}
+
+.button {
+  width: 100px;
+  border: 1px solid black;
+}
+
+
+
