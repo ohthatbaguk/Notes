@@ -17,10 +17,14 @@ export default function NoteEditor({ saveNote, editNote, note }: INoteParams) {
   const updateNotes = (text: string, note: INote) => {
     const [title, ...content] = text.split("\n");
     const contentLines = content.join("\n");
+
+    const regex = /#[0-9A-Za-zА-Яа-яё]+/g;
+    const tags = contentLines.match(regex) ?? [];
+
     if (note) {
-      editNote({ id: note.id, title: title, content: contentLines });
+      editNote({ id: note.id, title: title, content: contentLines, tags });
     } else {
-      saveNote({ id: uuidv4(), title: title, content: contentLines });
+      saveNote({ id: uuidv4(), title: title, content: contentLines, tags });
     }
   };
 
@@ -41,8 +45,13 @@ export default function NoteEditor({ saveNote, editNote, note }: INoteParams) {
         className={styles.textarea}
         value={text}
         onChange={handleChange}
-        placeholder="Start typing..."
+        placeholder="Notes"
       />
+      <ul>
+        {note?.tags.map((item) => (
+          <li key={note?.id}>{item}</li>
+        ))}
+      </ul>
     </div>
   );
 }

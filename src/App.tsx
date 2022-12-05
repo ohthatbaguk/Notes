@@ -16,15 +16,16 @@ export interface INote {
   id: string;
   title: string;
   content: string;
+  tags: string[];
 }
 
 function App() {
   const [activeNoteId, setActiveNoteId] = useState<string>("");
-  const [notes, setNotes] = useState<INote[]>(getFromLocalStorage("todos"));
+  const [notes, setNotes] = useState<INote[]>(getFromLocalStorage("notes"));
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    saveToLocalStorage("todos", notes);
+    saveToLocalStorage("notes", notes);
   }, [notes]);
 
   const activeNote = notes.find((note) => note.id === activeNoteId);
@@ -50,7 +51,6 @@ function App() {
   };
 
   const deleteNote = (activeNote?: INote): void => {
-    console.log(activeNote);
     if (!activeNote) return;
     setNotes((prevNotes) => {
       const newNotes = [...prevNotes];
@@ -60,7 +60,7 @@ function App() {
   };
 
   const handleButtonClick = (): void => {
-    const note: INote = { id: uuidv4(), title: "", content: "" };
+    const note: INote = { id: uuidv4(), title: "", content: "", tags: [] };
     saveNote(note);
     setActiveNoteId(note.id);
   };
