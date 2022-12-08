@@ -1,7 +1,7 @@
-import styles from "../../app.module.scss";
-import { Textarea } from "@chakra-ui/react";
+import styles from "./noteEditor.module.scss";
 import React, { useEffect, useRef, useState } from "react";
 import { INote } from "../../App";
+import { HighlightWithinTextarea } from "react-highlight-within-textarea";
 const debounce = require("debounce");
 const { v4: uuidv4 } = require("uuid");
 
@@ -9,17 +9,25 @@ interface INoteParams {
   note?: INote;
   saveNote: (note: INote) => void;
   editNote: (note: INote) => void;
+  onTagClick: (tag: string) => void;
 }
 
-export default function NoteEditor({ saveNote, editNote, note }: INoteParams) {
+const RegExp = /#[0-9A-Za-zА-Яа-яё]+/g;
+
+export default function NoteEditor({
+  saveNote,
+  editNote,
+  note,
+  onTagClick,
+}: INoteParams) {
   const [text, setText] = useState<string>(noteToText(note));
 
   const updateNotes = (text: string, note: INote) => {
     const [title, ...content] = text.split("\n");
     const contentLines = content.join("\n");
-
-    const regex = /#[0-9A-Za-zА-Яа-яё]+/g;
-    const tags = contentLines.match(regex) ?? [];
+    const tags = (contentLines.match(RegExp) ?? []).map((item) =>
+      item.slice(1)
+    );
 
     if (note) {
       editNote({ id: note.id, title: title, content: contentLines, tags });
@@ -34,22 +42,28 @@ export default function NoteEditor({ saveNote, editNote, note }: INoteParams) {
     setText(noteToText(note));
   }, [note]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setText(event.target.value);
-    deboucedFn.current(event.target.value, note);
+  const handleChange = (value: string) => {
+    setText(value);
+    deboucedFn.current(value, note);
   };
 
   return (
     <div className={styles.textareaContainer}>
-      <Textarea
-        className={styles.textarea}
+      <HighlightWithinTextarea
+        highlight={RegExp}
         value={text}
         onChange={handleChange}
         placeholder="Notes"
       />
-      <ul>
-        {note?.tags.map((item) => (
-          <li key={note?.id}>{item}</li>
+      <ul className={styles.tags}>
+        {note?.tags.map((item, index) => (
+          <li
+            key={index}
+            className={styles.tag}
+            onClick={() => onTagClick(item)}
+          >
+            #{item}
+          </li>
         ))}
       </ul>
     </div>
@@ -58,5 +72,6 @@ export default function NoteEditor({ saveNote, editNote, note }: INoteParams) {
 
 function noteToText(note?: INote): string {
   if (!note) return "";
+  if (!note.title) return note.content;
   return note.title + "\n" + note.content;
 }

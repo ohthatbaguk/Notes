@@ -24,7 +24,7 @@
   width: 90%;
 }
 
-ul li {
+.nonActive, .activeLi {
   list-style-type: none;
   font-size: 20px;
   padding: 10px;
@@ -55,13 +55,15 @@ ul li {
   align-items: center;
 }
 
-.textareaContainer {
-  flex: 1;
+.search {
+  background-color: white !important;
+  border-color: black !important;
 }
 
-.textarea {
-  resize: none;
-
+.liTitle {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .title {
@@ -71,9 +73,13 @@ ul li {
 .content {
   font-size: 10px;
   color: gray;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .button {
+  margin: 10px;
   width: 100px;
   border: 1px solid black;
 }

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { LegacyRef, useEffect, useRef, useState } from "react";
 import styles from "./app.module.scss";
-import { Button } from "@chakra-ui/react";
+import { Button, Input, InputGroup, InputRightElement } from "@chakra-ui/react";
 import NoteEditor from "./components/Note/NoteEditor";
 import plus from "../src/svg/plus.svg";
 import pencil from "../src/svg/pencil.svg";
@@ -11,6 +11,7 @@ import {
   saveToLocalStorage,
 } from "./service/localStorage";
 const { v4: uuidv4 } = require("uuid");
+const debounce = require("debounce");
 
 export interface INote {
   id: string;
@@ -22,11 +23,26 @@ export interface INote {
 function App() {
   const [activeNoteId, setActiveNoteId] = useState<string>("");
   const [notes, setNotes] = useState<INote[]>(getFromLocalStorage("notes"));
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null);
+  const [search, setSearch] = useState<string>("");
+  const [rawSearch, setRawSearch] = useState<string>("");
+  const ref = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     saveToLocalStorage("notes", notes);
   }, [notes]);
+
+  const handleDeleteClick = (
+    event: React.MouseEvent<HTMLImageElement, MouseEvent>,
+    noteId: string
+  ) => {
+    event.stopPropagation();
+    setNoteIdToDelete(noteId);
+  };
+
+  // useEffect(() => {
+  //   console.log(search);
+  // }, [search]);
 
   const activeNote = notes.find((note) => note.id === activeNoteId);
 
@@ -50,13 +66,13 @@ function App() {
     });
   };
 
-  const deleteNote = (activeNote?: INote): void => {
-    if (!activeNote) return;
+  const deleteNote = (activeNoteId: string | null): void => {
+    if (!activeNoteId) return;
     setNotes((prevNotes) => {
       const newNotes = [...prevNotes];
-      return newNotes.filter((item) => item.id !== activeNote.id);
+      return newNotes.filter((item) => item.id !== activeNoteId);
     });
-    setIsOpen(false);
+    setNoteIdToDelete(null);
   };
 
   const handleButtonClick = (): void => {
@@ -65,6 +81,29 @@ function App() {
     setActiveNoteId(note.id);
   };
 
+  const deboucedFn = useRef(debounce(setSearch, 300));
+
+  const setTagToSearch = (tag: string) => {
+    setRawSearch(tag);
+    setSearch(tag);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setRawSearch(e.target.value);
+    deboucedFn.current(e.target.value);
+  };
+
+  const clearSearch = () => {
+    const inputRef = ref.current;
+    if (!inputRef) return;
+    inputRef.value = "";
+    setRawSearch("");
+  };
+
+  const filteredNotes = notes?.filter((item) =>
+    item.tags?.some((tag) => tag.includes(rawSearch))
+  );
+
   return (
     <div className={styles.app}>
       <section className={styles.leftSection}>
@@ -72,24 +111,47 @@ function App() {
           <img src={pencil} alt="pencil" width="60" />
           <h3 className={styles.title}>Notes</h3>
           <section className={styles.ulContainer}>
+            <InputGroup size="md">
+              <Input
+                ref={ref}
+                onChange={handleChange}
+                value={rawSearch}
+                className={styles.search}
+                ml="27px"
+                pr="4.5rem"
+                placeholder="Search"
+                width={60}
+              />
+              <InputRightElement width="9rem">
+                <Button
+                  onClick={clearSearch}
+                  colorScheme="pink"
+                  h="1.75rem"
+                  size="sm"
+                >
+                  Delete
+                </Button>
+              </InputRightElement>
+            </InputGroup>
             <ul className={styles.ul}>
-              {notes?.map((note) => (
+              {(rawSearch ? filteredNotes : notes)?.map((note) => (
                 <li
                   className={
                     activeNoteId === note.id
                       ? styles.activeLi
                       : styles.nonActive
                   }
+                  onClick={() => handleClick(note.id)}
                   key={note.id}
                 >
-                  <p onClick={() => handleClick(note.id)}>
-                    {note.title || "New note"}
+                  <p className={styles.liTitle}>
+                    {note.title || "Empty title"}
                   </p>
                   <p className={styles.content}>
-                    {note.content || "No content"}
+                    {note.content || "Empty content"}
                   </p>
                   <img
-                    onClick={() => setIsOpen(true)}
+                    onClick={(event) => handleDeleteClick(event, note.id)}
                     className={styles.close}
                     src={close}
                     alt="close"
@@ -108,11 +170,16 @@ function App() {
           </section>
         </aside>
       </section>
-      <NoteEditor note={activeNote} saveNote={saveNote} editNote={editNote} />
+      <NoteEditor
+        note={activeNote}
+        saveNote={saveNote}
+        editNote={editNote}
+        onTagClick={setTagToSearch}
+      />
       <ModalWindow
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        deleteNote={() => deleteNote(activeNote)}
+        isOpen={!!noteIdToDelete}
+        onClose={() => setNoteIdToDelete(null)}
+        deleteNote={() => deleteNote(noteIdToDelete)}
       />
     </div>
   );

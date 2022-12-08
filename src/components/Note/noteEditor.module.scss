@@ -1,0 +1,18 @@
+.tags {
+  display: flex;
+  margin-top: 20px;
+}
+
+.tag {
+  list-style-type: none;
+  margin: 0 5px;
+}
+
+.tag:hover {
+  color: gray;
+}
+
+.textareaContainer {
+  flex: 1;
+  padding: 10px;
+}
