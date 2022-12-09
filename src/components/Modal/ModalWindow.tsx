@@ -12,13 +12,13 @@ import {
 interface IModalParams {
   isOpen: boolean;
   onClose: () => void;
-  deleteNote: () => void;
+  onConfirm: () => void;
 }
 
 export default function ModalWindow({
   isOpen,
   onClose,
-  deleteNote,
+  onConfirm,
 }: IModalParams) {
   return (
     <>
@@ -32,7 +32,7 @@ export default function ModalWindow({
             <p>Are you sure you want to delete it?</p>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="pink" mr={3} onClick={deleteNote}>
+            <Button colorScheme="pink" mr={3} onClick={onConfirm}>
               Yes, delete
             </Button>
             <Button colorScheme="green" mr={3} onClick={onClose}>

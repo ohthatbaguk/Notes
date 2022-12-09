@@ -1,4 +1,4 @@
-import React, { LegacyRef, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./app.module.scss";
 import { Button, Input, InputGroup, InputRightElement } from "@chakra-ui/react";
 import NoteEditor from "./components/Note/NoteEditor";
@@ -28,31 +28,16 @@ function App() {
   const [rawSearch, setRawSearch] = useState<string>("");
   const ref = React.useRef<HTMLInputElement>(null);
 
+  const activeNote = notes.find((note) => note.id === activeNoteId);
+  const filteredNotes = notes?.filter((item) =>
+    item.tags?.some((tag) => tag.includes(search))
+  );
+
   useEffect(() => {
     saveToLocalStorage("notes", notes);
   }, [notes]);
 
-  const handleDeleteClick = (
-    event: React.MouseEvent<HTMLImageElement, MouseEvent>,
-    noteId: string
-  ) => {
-    event.stopPropagation();
-    setNoteIdToDelete(noteId);
-  };
-
-  // useEffect(() => {
-  //   console.log(search);
-  // }, [search]);
-
-  const activeNote = notes.find((note) => note.id === activeNoteId);
-
-  const handleClick = (id: string): void => {
-    setActiveNoteId(id);
-  };
-
-  const saveNote = (note: INote): void => {
-    setNotes([...notes, note]);
-  };
+  const saveNote = (note: INote): void => setNotes([...notes, note]);
 
   const editNote = (note: INote): void => {
     setNotes((prevNotes) => {
@@ -75,34 +60,35 @@ function App() {
     setNoteIdToDelete(null);
   };
 
-  const handleButtonClick = (): void => {
+  const handleDeleteClick = (
+    event: React.MouseEvent<HTMLImageElement, MouseEvent>,
+    noteId: string
+  ) => {
+    event.stopPropagation();
+    setNoteIdToDelete(noteId);
+  };
+
+  const createNewNote = (): void => {
     const note: INote = { id: uuidv4(), title: "", content: "", tags: [] };
     saveNote(note);
     setActiveNoteId(note.id);
   };
 
-  const deboucedFn = useRef(debounce(setSearch, 300));
+  const debouncedSetSearch = useRef(debounce(setSearch, 300)).current;
 
-  const setTagToSearch = (tag: string) => {
-    setRawSearch(tag);
-    setSearch(tag);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setRawSearch(e.target.value);
-    deboucedFn.current(e.target.value);
+    debouncedSetSearch(e.target.value);
   };
 
-  const clearSearch = () => {
-    const inputRef = ref.current;
-    if (!inputRef) return;
-    inputRef.value = "";
-    setRawSearch("");
+  const forceSetSearch = (value: string = "") => {
+    debouncedSetSearch.clear();
+    setRawSearch(value);
+    setSearch(value);
   };
 
-  const filteredNotes = notes?.filter((item) =>
-    item.tags?.some((tag) => tag.includes(rawSearch))
-  );
+  const setTagToSearch = (tag: string) => forceSetSearch(tag);
+  const clearSearch = () => forceSetSearch();
 
   return (
     <div className={styles.app}>
@@ -114,7 +100,7 @@ function App() {
             <InputGroup size="md">
               <Input
                 ref={ref}
-                onChange={handleChange}
+                onChange={handleSearchChange}
                 value={rawSearch}
                 className={styles.search}
                 ml="27px"
@@ -136,13 +122,13 @@ function App() {
             <ul className={styles.ul}>
               {(rawSearch ? filteredNotes : notes)?.map((note) => (
                 <li
+                  key={note.id}
                   className={
                     activeNoteId === note.id
                       ? styles.activeLi
                       : styles.nonActive
                   }
-                  onClick={() => handleClick(note.id)}
-                  key={note.id}
+                  onClick={() => setActiveNoteId(note.id)}
                 >
                   <p className={styles.liTitle}>
                     {note.title || "Empty title"}
@@ -163,7 +149,7 @@ function App() {
             <Button
               colorScheme="pink"
               className={styles.button}
-              onClick={handleButtonClick}
+              onClick={createNewNote}
             >
               <img src={plus} width="40" alt="plus-button" />
             </Button>
@@ -179,7 +165,7 @@ function App() {
       <ModalWindow
         isOpen={!!noteIdToDelete}
         onClose={() => setNoteIdToDelete(null)}
-        deleteNote={() => deleteNote(noteIdToDelete)}
+        onConfirm={() => deleteNote(noteIdToDelete)}
       />
     </div>
   );

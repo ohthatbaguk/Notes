@@ -1,6 +1,5 @@
 .tags {
   display: flex;
-  margin-top: 20px;
 }
 
 .tag {
@@ -12,7 +11,10 @@
   color: gray;
 }
 
-.textareaContainer {
+.container {
   flex: 1;
   padding: 10px;
+}
+
+.card {
 }
