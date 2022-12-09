@@ -65,6 +65,11 @@ function App() {
     noteId: string
   ) => {
     event.stopPropagation();
+    const note = notes.find((note) => note.id === noteId);
+    if (note && !note.title && !note.content) {
+      deleteNote(noteId);
+      return;
+    }
     setNoteIdToDelete(noteId);
   };
 
