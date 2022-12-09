@@ -157,6 +157,7 @@ function App() {
         </aside>
       </section>
       <NoteEditor
+        key={activeNote?.id}
         note={activeNote}
         saveNote={saveNote}
         editNote={editNote}

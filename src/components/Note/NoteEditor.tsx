@@ -1,5 +1,5 @@
 import styles from "./noteEditor.module.scss";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { INote } from "../../App";
 import { HighlightWithinTextarea } from "react-highlight-within-textarea";
 import { Card, CardBody, CardFooter, Divider } from "@chakra-ui/react";
@@ -36,10 +36,6 @@ export default function NoteEditor({
   };
 
   const deboucedFn = useRef(debounce(updateNotes, 500));
-
-  useEffect(() => {
-    setText(noteToText(note));
-  }, [note]);
 
   const handleChange = (value: string) => {
     setText(value);
