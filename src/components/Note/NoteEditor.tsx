@@ -1,10 +1,10 @@
 import styles from "./noteEditor.module.scss";
 import React, { useRef, useState } from "react";
-import { INote } from "../../App";
 import { HighlightWithinTextarea } from "react-highlight-within-textarea";
 import { Card, CardBody, CardFooter, Divider } from "@chakra-ui/react";
+import { INote } from "../../service/note";
+import { v4 as uuidv4 } from "uuid";
 const debounce = require("debounce");
-const { v4: uuidv4 } = require("uuid");
 
 interface INoteParams {
   note?: INote;

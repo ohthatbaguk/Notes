@@ -10,19 +10,19 @@ import {
   getFromLocalStorage,
   saveToLocalStorage,
 } from "./service/localStorage";
+import { createEmptyNote, INote } from "./service/note";
 const { v4: uuidv4 } = require("uuid");
 const debounce = require("debounce");
 
-export interface INote {
-  id: string;
-  title: string;
-  content: string;
-  tags: string[];
+function getInitialNotes(): INote[] {
+  const notes = getFromLocalStorage("notes");
+  if (notes.length) return notes;
+  return [createEmptyNote()];
 }
 
 function App() {
-  const [activeNoteId, setActiveNoteId] = useState<string>("");
-  const [notes, setNotes] = useState<INote[]>(getFromLocalStorage("notes"));
+  const [notes, setNotes] = useState<INote[]>(getInitialNotes);
+  const [activeNoteId, setActiveNoteId] = useState<string>(notes[0]?.id);
   const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null);
   const [search, setSearch] = useState<string>("");
   const [rawSearch, setRawSearch] = useState<string>("");
@@ -37,7 +37,10 @@ function App() {
     saveToLocalStorage("notes", notes);
   }, [notes]);
 
-  const saveNote = (note: INote): void => setNotes([...notes, note]);
+  const saveNote = (note: INote): void => {
+    setNotes([...notes, note]);
+    setActiveNoteId(note.id);
+  };
 
   const editNote = (note: INote): void => {
     setNotes((prevNotes) => {
@@ -51,11 +54,17 @@ function App() {
     });
   };
 
-  const deleteNote = (activeNoteId: string | null): void => {
-    if (!activeNoteId) return;
+  useEffect(() => {
+    if (!activeNote) {
+      setActiveNoteId(notes[0]?.id);
+    }
+  }, [activeNote, notes]);
+
+  const deleteNote = (noteId: string | null): void => {
+    if (!noteId) return;
     setNotes((prevNotes) => {
-      const newNotes = [...prevNotes];
-      return newNotes.filter((item) => item.id !== activeNoteId);
+      const newNotes = [...prevNotes].filter((item) => item.id !== noteId);
+      return newNotes.length ? newNotes : [createEmptyNote()];
     });
     setNoteIdToDelete(null);
   };
