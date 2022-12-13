@@ -1,16 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./app.module.scss";
-import { Button, Input, InputGroup, InputRightElement } from "@chakra-ui/react";
-import NoteEditor from "./components/Note/NoteEditor";
+import { Button } from "@chakra-ui/react";
+import NoteEditor from "./components/Note/NoteEditor/NoteEditor";
 import plus from "../src/svg/plus.svg";
 import pencil from "../src/svg/pencil.svg";
-import close from "../src/svg/close.svg";
 import ModalWindow from "./components/Modal/ModalWindow";
 import {
   getFromLocalStorage,
   saveToLocalStorage,
 } from "./service/localStorage";
 import { createEmptyNote, INote } from "./service/note";
+import SearchInput from "./components/SearchInput/SearchInput";
+import ListOfNotes from "./components/Note/ListOfNotes/ListOfNotes";
 const { v4: uuidv4 } = require("uuid");
 const debounce = require("debounce");
 
@@ -26,7 +27,6 @@ function App() {
   const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null);
   const [search, setSearch] = useState<string>("");
   const [rawSearch, setRawSearch] = useState<string>("");
-  const ref = React.useRef<HTMLInputElement>(null);
 
   const activeNote = notes.find((note) => note.id === activeNoteId);
   const filteredNotes = notes?.filter((item) =>
@@ -111,55 +111,19 @@ function App() {
           <img src={pencil} alt="pencil" width="60" />
           <h3 className={styles.title}>Notes</h3>
           <section className={styles.ulContainer}>
-            <InputGroup size="md">
-              <Input
-                ref={ref}
-                onChange={handleSearchChange}
-                value={rawSearch}
-                className={styles.search}
-                ml="27px"
-                pr="4.5rem"
-                placeholder="Search"
-                width={60}
-              />
-              <InputRightElement width="9rem">
-                <Button
-                  onClick={clearSearch}
-                  colorScheme="pink"
-                  h="1.75rem"
-                  size="sm"
-                >
-                  Delete
-                </Button>
-              </InputRightElement>
-            </InputGroup>
-            <ul className={styles.ul}>
-              {(rawSearch ? filteredNotes : notes)?.map((note) => (
-                <li
-                  key={note.id}
-                  className={
-                    activeNoteId === note.id
-                      ? styles.activeLi
-                      : styles.nonActive
-                  }
-                  onClick={() => setActiveNoteId(note.id)}
-                >
-                  <p className={styles.liTitle}>
-                    {note.title || "Empty title"}
-                  </p>
-                  <p className={styles.content}>
-                    {note.content || "Empty content"}
-                  </p>
-                  <img
-                    onClick={(event) => handleDeleteClick(event, note.id)}
-                    className={styles.close}
-                    src={close}
-                    alt="close"
-                    width="30"
-                  />
-                </li>
-              ))}
-            </ul>
+            <SearchInput
+              handleSearchChange={handleSearchChange}
+              rawSearch={rawSearch}
+              clearSearch={clearSearch}
+            />
+            <ListOfNotes
+              notes={notes}
+              rawSearch={rawSearch}
+              activeNoteId={activeNoteId}
+              setActiveNoteId={setActiveNoteId}
+              handleDeleteClick={handleDeleteClick}
+              filteredNotes={filteredNotes}
+            />
             <Button
               colorScheme="pink"
               className={styles.button}
